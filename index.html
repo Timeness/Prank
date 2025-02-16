@@ -3,93 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTProto Proxy Rotator</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        input, button { padding: 10px; margin: 10px; }
-        #proxies { margin-top: 20px; }
-        .proxy { margin-bottom: 10px; }
-    </style>
+    <title>Incognito Search</title>
 </head>
 <body>
-    <h1>MTProto Proxy Rotator</h1>
-    <label for="proxyInput">Enter Telegram Proxy Link:</label>
-    <input type="text" id="proxyInput" placeholder="Paste Telegram MTProto Proxy Link">
-    <button onclick="addProxy()">Add Proxy</button>
-
-    <h2>Valid Proxies:</h2>
-    <div id="proxies"></div>
+    <h1>Incognito Browser Search</h1>
+    <input type="text" id="searchInput" placeholder="Search...">
+    <button onclick="search()">Search</button>
 
     <script>
-        let proxies = [];
-
-        // Function to add proxy
-        function addProxy() {
-            const input = document.getElementById('proxyInput').value;
-            const urlParams = new URLSearchParams(input.split('?')[1]);
-
-            const proxy = {
-                server: urlParams.get('server'),
-                port: urlParams.get('port'),
-                secret: urlParams.get('secret'),
-            };
-
-            proxies.push(proxy);
-            displayProxies();
-            document.getElementById('proxyInput').value = ''; // Clear input
-        }
-
-        // Function to display proxies in the DOM
-        function displayProxies() {
-            const proxiesDiv = document.getElementById('proxies');
-            proxiesDiv.innerHTML = '';
-            proxies.forEach((proxy, index) => {
-                const proxyDiv = document.createElement('div');
-                proxyDiv.classList.add('proxy');
-                proxyDiv.innerHTML = `Proxy ${index + 1}: ${proxy.server}:${proxy.port}`;
-                proxiesDiv.appendChild(proxyDiv);
-            });
-            checkProxiesPing();
-        }
-
-        // Function to check the ping for each proxy
-        async function checkProxiesPing() {
-            const validProxies = [];
-
-            for (const proxy of proxies) {
-                try {
-                    const startTime = Date.now();
-                    const response = await axios.get(`https://${proxy.server}:${proxy.port}`, {
-                        timeout: 3000, // Set timeout to prevent long hangs
-                        headers: {
-                            'X-Secret': proxy.secret,
-                        }
-                    });
-                    const ping = Date.now() - startTime;
-
-                    // Only keep proxies with ping less than 600ms
-                    if (ping < 600) {
-                        validProxies.push({ ...proxy, ping });
-                    }
-                } catch (error) {
-                    console.log(`Error with proxy ${proxy.server}:${proxy.port}`);
-                }
+        function search() {
+            const searchQuery = document.getElementById('searchInput').value.trim();
+            if (searchQuery) {
+                // Open a new tab to search the query on Google (or any search engine)
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, '_blank');
+            } else {
+                alert('Please enter a search term!');
             }
 
-            // Display valid proxies with ping time
-            const validProxiesDiv = document.getElementById('proxies');
-            validProxiesDiv.innerHTML = 'Valid Proxies with Ping Below 600ms:';
-            validProxies.forEach((proxy, index) => {
-                const proxyDiv = document.createElement('div');
-                proxyDiv.classList.add('proxy');
-                proxyDiv.innerHTML = `Proxy ${index + 1}: ${proxy.server}:${proxy.port} (Ping: ${proxy.ping} ms)`;
-                validProxiesDiv.appendChild(proxyDiv);
-            });
-
-            proxies = validProxies;  // Update the proxies list with only valid ones
+            // Clear input after search
+            document.getElementById('searchInput').value = '';
         }
 
+        // Prevents browser from storing history or caching by using a meta tag
+        document.addEventListener('DOMContentLoaded', () => {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }).catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+            }
+        });
     </script>
 </body>
 </html>
