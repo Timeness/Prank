@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Prank Website</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: black;
+            color: black;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .content {
+            text-align: center;
+            font-size: 32px;
+            color: white;
+            position: absolute;
+            z-index: 10;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <audio id="scary-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="content">
+        <h1>Welcome to the Prank Page!</h1>
+        <p>Just wait until it's 3:10 PM...</p>
+    </div>
+
+    <script>
+        function checkTimeAndPlayMusic() {
+            const currentTime = new Date();
+            const hours = currentTime.getHours();
+            const minutes = currentTime.getMinutes();
+
+            // If it's 3:10 PM, start the music
+            if (hours === 15 && minutes === 10) {
+                const audio = document.getElementById('scary-music');
+                audio.play();
+                document.querySelector('.content').innerHTML = "<h1>It's 3:10 PM... Too late!</h1>";
+                document.querySelector('.content').style.fontSize = '48px';
+                document.body.style.backgroundColor = 'black'; // Keep the spooky vibe going!
+            } else {
+                // Keep checking every second
+                setTimeout(checkTimeAndPlayMusic, 1000); // Check every second
+            }
+        }
+
+        // Start checking for 3:10 PM
+        checkTimeAndPlayMusic();
+    </script>
+</body>
+</html>
