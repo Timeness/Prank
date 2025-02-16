@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prank Website</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: black;
+            color: black;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .content {
+            text-align: center;
+            font-size: 32px;
+            color: white;
+            position: absolute;
+            z-index: 10;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <audio id="scary-music" autoplay loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="content">
+        <h1>Wait... what?</h1>
+        <p>This page is cursed...</p>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Prevent back navigation by disabling the back button
+            history.pushState(null, null, window.location.href);
+            window.onpopstate = function() {
+                history.pushState(null, null, window.location.href);
+            };
+
+            // Disable any interaction with the page
+            document.body.style.pointerEvents = 'none';
+
+            // Show the page once it's loaded
+            setTimeout(function() {
+                document.querySelector('.content').classList.add('hidden');
+                const audio = document.getElementById('scary-music');
+                audio.play();  // Play the scary music
+            }, 2000);
+        };
+    </script>
+</body>
+</html>
