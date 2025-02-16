@@ -3,60 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prank Website</title>
+    <title>MTProto Proxy Rotator</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background-color: black;
-            color: black;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .content {
-            text-align: center;
-            font-size: 32px;
-            color: white;
-            position: absolute;
-            z-index: 10;
-        }
-        .hidden {
-            display: none;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, button { padding: 10px; margin: 10px; }
+        #proxies { margin-top: 20px; }
+        .proxy { margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <audio id="scary-music" autoplay loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
-        Your browser does not support the audio element.
-    </audio>
+    <h1>MTProto Proxy Rotator</h1>
+    <label for="proxyInput">Enter Telegram Proxy Link:</label>
+    <input type="text" id="proxyInput" placeholder="Paste Telegram MTProto Proxy Link">
+    <button onclick="addProxy()">Add Proxy</button>
 
-    <div class="content">
-        <h1>Wait... what?</h1>
-        <p>This page is cursed...</p>
-    </div>
+    <h2>Valid Proxies:</h2>
+    <div id="proxies"></div>
 
     <script>
-        window.onload = function() {
-            // Prevent back navigation by disabling the back button
-            history.pushState(null, null, window.location.href);
-            window.onpopstate = function() {
-                history.pushState(null, null, window.location.href);
+        let proxies = [];
+
+        // Function to add proxy
+        function addProxy() {
+            const input = document.getElementById('proxyInput').value;
+            const urlParams = new URLSearchParams(input.split('?')[1]);
+
+            const proxy = {
+                server: urlParams.get('server'),
+                port: urlParams.get('port'),
+                secret: urlParams.get('secret'),
             };
 
-            // Disable any interaction with the page
-            document.body.style.pointerEvents = 'none';
+            proxies.push(proxy);
+            displayProxies();
+            document.getElementById('proxyInput').value = ''; // Clear input
+        }
 
-            // Show the page once it's loaded
-            setTimeout(function() {
-                document.querySelector('.content').classList.add('hidden');
-                const audio = document.getElementById('scary-music');
-                audio.play();  // Play the scary music
-            }, 2000);
-        };
+        // Function to display proxies in the DOM
+        function displayProxies() {
+            const proxiesDiv = document.getElementById('proxies');
+            proxiesDiv.innerHTML = '';
+            proxies.forEach((proxy, index) => {
+                const proxyDiv = document.createElement('div');
+                proxyDiv.classList.add('proxy');
+                proxyDiv.innerHTML = `Proxy ${index + 1}: ${proxy.server}:${proxy.port}`;
+                proxiesDiv.appendChild(proxyDiv);
+            });
+            checkProxiesPing();
+        }
+
+        // Function to check the ping for each proxy
+        async function checkProxiesPing() {
+            const validProxies = [];
+
+            for (const proxy of proxies) {
+                try {
+                    const startTime = Date.now();
+                    const response = await axios.get(`https://${proxy.server}:${proxy.port}`, {
+                        timeout: 3000, // Set timeout to prevent long hangs
+                        headers: {
+                            'X-Secret': proxy.secret,
+                        }
+                    });
+                    const ping = Date.now() - startTime;
+
+                    // Only keep proxies with ping less than 600ms
+                    if (ping < 600) {
+                        validProxies.push({ ...proxy, ping });
+                    }
+                } catch (error) {
+                    console.log(`Error with proxy ${proxy.server}:${proxy.port}`);
+                }
+            }
+
+            // Display valid proxies with ping time
+            const validProxiesDiv = document.getElementById('proxies');
+            validProxiesDiv.innerHTML = 'Valid Proxies with Ping Below 600ms:';
+            validProxies.forEach((proxy, index) => {
+                const proxyDiv = document.createElement('div');
+                proxyDiv.classList.add('proxy');
+                proxyDiv.innerHTML = `Proxy ${index + 1}: ${proxy.server}:${proxy.port} (Ping: ${proxy.ping} ms)`;
+                validProxiesDiv.appendChild(proxyDiv);
+            });
+
+            proxies = validProxies;  // Update the proxies list with only valid ones
+        }
+
     </script>
 </body>
 </html>
